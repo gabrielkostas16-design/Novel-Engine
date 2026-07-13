@@ -1,0 +1,144 @@
+schema_version: 1
+generated_at: "2026-07-13"
+phase: "M0-fork-and-baseline-governance"
+
+product_repository:
+  owner: "gabrielkostas16-design"
+  name: "Novel-Engine"
+  url: "https://github.com/gabrielkostas16-design/Novel-Engine"
+  visibility: "public"
+  default_branch: "main"
+  working_branch: "codex/m0-baseline-governance"
+  upstream_remote: "https://github.com/Jackela/Novel-Engine.git"
+  baseline_tag: "upstream-baseline-20260713"
+  baseline_commit: "3279f5c7d8b4c1d4efe03934163bff39f5af32ef"
+  baseline_tree: "77c3398f97c540c4dd3d8661025d14705847a7f2"
+
+baseline_checksums:
+  LICENSE: "e44da31b0081b99a3fc13cbd1dd6aec381bf0aff43e78cd0574a58bef0ad7d8f"
+  uv.lock: "a32b47deba03d44e559d5fda78eb283c4ab724c5a21f8b20db5810347a4300be"
+  pnpm-lock.yaml: "c1098acc221ef9d20fe112f1366c52daebb74346f66a7775b00442f04a782f67"
+  pyproject.toml: "03b42983116c7562d0ce3e27a248d234c65304743ad2533d416a89e690af7a27"
+  package.json: "b85401532287753f6fce0496121090a679f1b109a05fbae450e467b688f5e28e"
+  frontend/package.json: "02357c339cd4f233fecddbb8a4215f22c8f02b0204f9c80830b36d4fb5b7c90c"
+
+policies:
+  future_business_authority: "PostgreSQL"
+  m0_preserved_authority: "upstream SQLite behavior"
+  ai_write_boundary: "Artifact or Proposal before accepted Revision or Canon change"
+  direct_copy_allowed_licenses:
+    - "MIT"
+    - "Apache-2.0"
+  direct_copy_requires:
+    - "per-file source record"
+    - "license and notice preservation"
+    - "third-party content review"
+    - "architecture and contract review"
+    - "independent validation"
+  clean_room_only:
+    - "GPL family unless compatible copyleft terms are adopted"
+    - "AGPL family unless compatible copyleft terms or a separate license are adopted"
+    - "repositories without an explicit license"
+  prohibited_material:
+    - "unlicensed code, prompts, types, text, images, covers, datasets, and samples"
+    - "third-party demo content without a separate rights review"
+    - "private author content as fixtures or seed data"
+
+sources:
+  - id: "novel-engine-upstream"
+    repository: "Jackela/Novel-Engine"
+    url: "https://github.com/Jackela/Novel-Engine"
+    commit: "3279f5c7d8b4c1d4efe03934163bff39f5af32ef"
+    observed_license: "MIT"
+    treatment: "fork_baseline"
+    incorporation_status: "incorporated_entire_repository"
+    imported_paths: ["**"]
+    exclusions: []
+    notes: "Original copyright and permission notice remain in LICENSE."
+
+  - id: "story-workbench-donor"
+    repository: "yuanbw2025/story\u0066orge"
+    url: "https://github.com/yuanbw2025/story\u0066orge"
+    commit: "05d2615f6e04"
+    observed_license: "MIT"
+    treatment: "selective_migration"
+    incorporation_status: "planned_not_imported"
+    imported_paths: []
+    exclusions: ["IndexedDB or Dexie as server authority"]
+    notes: "Use novel-domain workbench evidence through the product API."
+
+  - id: "denova"
+    repository: "alfredxw/denova"
+    url: "https://github.com/alfredxw/denova"
+    commit: "d7aadb8013cd"
+    observed_license: "Apache-2.0"
+    treatment: "selective_migration"
+    incorporation_status: "planned_not_imported"
+    imported_paths: []
+    exclusions: ["RPG and unrelated platform domains"]
+    notes: "Use version, rollback, Agent, Skill, and run-console UX selectively."
+
+  - id: "narraverse-engine"
+    repository: "wssyh339/Narraverse-Engine"
+    url: "https://github.com/wssyh339/Narraverse-Engine"
+    commit: "f6d97d2cbeee"
+    observed_license: "MIT"
+    treatment: "model_and_contract_extraction"
+    incorporation_status: "planned_not_imported"
+    imported_paths: []
+    exclusions:
+      - "monolithic service files"
+      - "its database as a second authority"
+    notes: "Use StoryBible, canon, character state, and approval concepts in product-owned modules."
+
+  - id: "novel-studio"
+    repository: "Xiaoyangy/novel-studio"
+    url: "https://github.com/Xiaoyangy/novel-studio"
+    commit: "fb8513cf60ba"
+    observed_license: "Apache-2.0"
+    treatment: "rewrite_from_behavioral_evidence"
+    incorporation_status: "blocked_pending_provenance_review"
+    imported_paths: []
+    exclusions:
+      - "direct code import before its relationship with ainovel-cli is closed"
+      - "file state as product authority"
+    notes: "Use pipeline, quality gate, checkpoint, and recovery behavior as acceptance evidence."
+
+  - id: "oh-story-claudecode"
+    repository: "worldwonderer/oh-story-claudecode"
+    url: "https://github.com/worldwonderer/oh-story-claudecode"
+    commit: "097a7505c407"
+    observed_license: "MIT"
+    treatment: "method_contract_rewrite"
+    incorporation_status: "planned_not_imported"
+    imported_paths: []
+    exclusions:
+      - "demo/**"
+      - "third-party text, covers, images, and examples"
+    notes: "Rewrite organization and routing as typed, versioned MethodPack contracts."
+
+  - id: "huobao-novel"
+    repository: "chatfire-AI/huobao-novel"
+    url: "https://github.com/chatfire-AI/huobao-novel"
+    commit: "a4590ebfcc76"
+    observed_license: "MIT"
+    treatment: "content_pack_rewrite"
+    incorporation_status: "planned_not_imported"
+    imported_paths: []
+    exclusions: []
+    notes: "Rewrite Chinese snowflake, chapter planning, state write-back, and consistency methods."
+
+  - id: "ai-novel-writing-assistant"
+    repository: "ExplosiveCoderflome/AI-Novel-Writing-Assistant"
+    url: "https://github.com/ExplosiveCoderflome/AI-Novel-Writing-Assistant"
+    commit: "7785b0569bb0"
+    observed_license: "AGPL-3.0-only"
+    treatment: "clean_room_evidence_only"
+    incorporation_status: "prohibited_from_direct_import"
+    imported_paths: []
+    exclusions:
+      - "all code"
+      - "all prompts"
+      - "all schemas and type definitions"
+      - "all bundled assets and data"
+    notes: "Translate only independently stated run-ledger and recovery requirements."

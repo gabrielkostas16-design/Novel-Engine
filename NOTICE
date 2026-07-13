@@ -1,0 +1,24 @@
+Novel Factory product repository
+M0 baseline notice, 2026-07-13
+
+This repository is derived from:
+
+  Novel Studio / Novel-Engine
+  https://github.com/Jackela/Novel-Engine
+  fixed revision 3279f5c7d8b4c1d4efe03934163bff39f5af32ef
+
+The upstream work is distributed under the MIT License and carries:
+
+  Copyright (c) 2024 Novel Engine
+
+The full upstream copyright and permission notice is preserved in the root
+LICENSE file. The upstream code is provided without warranty, as stated there.
+
+Modifications made in this fork are tracked by Git history. This NOTICE does
+not replace the LICENSE file and does not change the license of upstream or
+third-party material.
+
+At the M0 baseline, no donor code, prompts, samples, images, or data have been
+incorporated beyond the Novel-Engine fork itself. Planned donors and their
+integration restrictions are recorded in THIRD_PARTY.md and provenance.yaml.
+
