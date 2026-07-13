@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import hashlib
+import subprocess
+from pathlib import Path
+
 import pytest
 
 from scripts.ai import regression_check
@@ -33,6 +37,39 @@ def test_build_diff_command_rejects_partial_ref_configuration() -> None:
     # Given / When / Then
     with pytest.raises(ValueError, match="provided together"):
         regression_check.build_diff_command("origin/main", None)
+
+
+def test_approved_migrations_are_loaded_from_base_ref_only(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Given
+    migration_path = "alembic/versions/0004.py"
+    digest = "a" * 64
+
+    def fake_run(
+        command: list[str],
+        **kwargs: object,
+    ) -> subprocess.CompletedProcess[str]:
+        assert command == [
+            "git",
+            "show",
+            f"origin/main:{regression_check.APPROVED_MIGRATIONS_FILE}",
+        ]
+        assert kwargs["cwd"] == regression_check.PROJECT_ROOT
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout=f"{digest}  {migration_path}\n",
+            stderr="",
+        )
+
+    monkeypatch.setattr(regression_check.subprocess, "run", fake_run)
+
+    # When
+    approved = regression_check.load_approved_migrations("origin/main")
+
+    # Then
+    assert approved == {migration_path: digest}
 
 
 def test_parse_diff_groups_additions_deletions_and_deleted_files() -> None:
@@ -232,6 +269,94 @@ def test_file_scope_reports_count_and_forbidden_prefixes() -> None:
         "AI changed 7 files. Consider splitting into smaller tasks.",
         "AI modified forbidden zone: alembic/versions/0004.py",
     ]
+
+
+def test_file_scope_allows_exact_base_approved_new_migration(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    # Given
+    migration_path = "alembic/versions/0004.py"
+    content = b'revision = "0004"\n'
+    target = tmp_path / migration_path
+    target.parent.mkdir(parents=True)
+    target.write_bytes(content)
+    monkeypatch.setattr(regression_check, "PROJECT_ROOT", tmp_path)
+    details = regression_check.DiffDetails(
+        additions={migration_path: ['+revision = "0004"']},
+        deletions={},
+        deleted_files=set(),
+    )
+    approved = {migration_path: hashlib.sha256(content).hexdigest()}
+
+    # When
+    issues = regression_check.check_file_scope(
+        details,
+        max_files=5,
+        skip_file_count=False,
+        approved_migrations=approved,
+    )
+
+    # Then
+    assert issues == []
+
+
+def test_file_scope_rejects_approved_path_when_digest_changes(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    # Given
+    migration_path = "alembic/versions/0004.py"
+    target = tmp_path / migration_path
+    target.parent.mkdir(parents=True)
+    target.write_text('revision = "changed"\n')
+    monkeypatch.setattr(regression_check, "PROJECT_ROOT", tmp_path)
+    details = regression_check.DiffDetails(
+        additions={migration_path: ['+revision = "changed"']},
+        deletions={},
+        deleted_files=set(),
+    )
+
+    # When
+    issues = regression_check.check_file_scope(
+        details,
+        max_files=5,
+        skip_file_count=False,
+        approved_migrations={migration_path: "0" * 64},
+    )
+
+    # Then
+    assert issues == [f"AI modified forbidden zone: {migration_path}"]
+
+
+def test_file_scope_rejects_modifying_existing_approved_migration(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    # Given
+    migration_path = "alembic/versions/0004.py"
+    content = b'revision = "0004"\n'
+    target = tmp_path / migration_path
+    target.parent.mkdir(parents=True)
+    target.write_bytes(content)
+    monkeypatch.setattr(regression_check, "PROJECT_ROOT", tmp_path)
+    details = regression_check.DiffDetails(
+        additions={migration_path: ['+revision = "0004"']},
+        deletions={migration_path: ['-revision = "old"']},
+        deleted_files=set(),
+    )
+    approved = {migration_path: hashlib.sha256(content).hexdigest()}
+
+    # When
+    issues = regression_check.check_file_scope(
+        details,
+        max_files=5,
+        skip_file_count=False,
+        approved_migrations=approved,
+    )
+
+    # Then
+    assert issues == [f"AI modified forbidden zone: {migration_path}"]
 
 
 def test_main_can_skip_file_count_for_ci_scope_policy(
