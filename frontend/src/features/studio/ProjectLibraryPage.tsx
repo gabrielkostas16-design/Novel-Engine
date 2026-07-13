@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import {
+  Activity,
   BookOpen,
   ChevronRight,
   Clock3,
   Download,
+  Feather,
   GitBranch,
   Globe2,
   Library,
@@ -102,8 +104,14 @@ export function ProjectLibraryPage() {
     <main className="library">
       <aside className="library-sidebar">
         <div className="library-sidebar__brand">
-          <BookOpen aria-hidden="true" />
-          <span>小说创作工厂</span>
+          <span className="library-sidebar__brand-mark" aria-hidden="true">
+            <BookOpen />
+            <Feather />
+          </span>
+          <span>
+            龙文 AI 小说工厂
+            <small>本地智能创作中心</small>
+          </span>
         </div>
         <nav className="library-sidebar__nav" aria-label="小说创作工厂导航">
           <a className="active" href="#create-project">
@@ -127,7 +135,10 @@ export function ProjectLibraryPage() {
 
       <section className="library-shell">
         <header className="library__header">
-          <strong>创意工作台</strong>
+          <strong>
+            <Activity aria-hidden="true" />
+            创作控制台
+          </strong>
           <div className="library__header-actions">
             {session?.kind === 'guest' ? (
               <span className="session-expiry">
@@ -152,9 +163,17 @@ export function ProjectLibraryPage() {
 
         <div className="library__content">
           <section className="library__intro">
-            <span>创意工作台</span>
-            <h1>从一个念头，开始一部小说</h1>
-            <p>选择篇幅与类型，把核心创意变成可以继续写作、检查和出版的作品。</p>
+            <span>龙文创作系统</span>
+            <h1>
+              从一个<em>念头</em>，<span>启动一条小说生产线</span>
+            </h1>
+            <p>把灵感送入创作流程，让大纲、人物、正文和质量检查在同一座工厂里持续推进。</p>
+            <div className="library__signal" aria-hidden="true">
+              <span>
+                <Feather />
+              </span>
+              <small>灵感核心</small>
+            </div>
           </section>
 
           <ol className="creation-path" aria-label="小说生产流程">
