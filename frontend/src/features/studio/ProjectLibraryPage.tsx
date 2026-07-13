@@ -37,12 +37,16 @@ const WORKFLOW_ITEMS = [
 ] as const;
 
 const CREATION_STEPS = ['创意', '世界观', '人物', '大纲', '正文', '质检', '出版'];
+const PROJECT_DATE_FORMATTER = new Intl.DateTimeFormat('zh-CN', {
+  month: 'short',
+  day: 'numeric',
+});
 
 function formatProjectDate(value: string): string {
   const date = new Date(value);
   const today = new Date();
   if (date.toDateString() === today.toDateString()) return '今天';
-  return new Intl.DateTimeFormat('zh-CN', { month: 'short', day: 'numeric' }).format(date);
+  return PROJECT_DATE_FORMATTER.format(date);
 }
 
 export function ProjectLibraryPage() {
