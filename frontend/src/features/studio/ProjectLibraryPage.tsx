@@ -3,7 +3,6 @@ import {
   Activity,
   BookOpen,
   ChevronRight,
-  Clock3,
   Download,
   Feather,
   GitBranch,
@@ -20,7 +19,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 
 import { api } from '@/app/api';
-import type { Project, Session } from '@/app/types/studio';
+import type { Project } from '@/app/types/studio';
 
 const STORY_FORMATS = [
   { value: '短篇故事', detail: '1 万字以内' },
@@ -53,7 +52,6 @@ function formatProjectDate(value: string): string {
 
 export function ProjectLibraryPage() {
   const navigate = useNavigate();
-  const [session, setSession] = useState<Session | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -64,8 +62,7 @@ export function ProjectLibraryPage() {
 
   const load = useCallback(async () => {
     try {
-      const [nextSession, response] = await Promise.all([api.session(), api.projects()]);
-      setSession(nextSession);
+      const [, response] = await Promise.all([api.session(), api.projects()]);
       setProjects(response.projects);
     } catch {
       navigate('/', { replace: true });
@@ -73,6 +70,7 @@ export function ProjectLibraryPage() {
   }, [navigate]);
 
   useEffect(() => {
+    document.title = '坤雷小说工厂';
     void load();
   }, [load]);
 
@@ -109,11 +107,11 @@ export function ProjectLibraryPage() {
             <Feather />
           </span>
           <span>
-            龙文 AI 小说工厂
+            坤雷小说工厂
             <small>本地智能创作中心</small>
           </span>
         </div>
-        <nav className="library-sidebar__nav" aria-label="小说创作工厂导航">
+        <nav className="library-sidebar__nav" aria-label="坤雷小说工厂导航">
           <a className="active" href="#create-project">
             <Lightbulb aria-hidden="true" />
             创意项目
@@ -140,16 +138,7 @@ export function ProjectLibraryPage() {
             创作控制台
           </strong>
           <div className="library__header-actions">
-            {session?.kind === 'guest' ? (
-              <span className="session-expiry">
-                <Clock3 aria-hidden="true" />
-                临时工作区将在{' '}
-                {session.expires_at ? new Date(session.expires_at).toLocaleString('zh-CN') : ''}
-                失效
-              </span>
-            ) : (
-              <span className="library__account">本地作者</span>
-            )}
+            <span className="library__account">本地作者</span>
             <button
               className="icon-command"
               onClick={() => void logout()}
@@ -163,7 +152,7 @@ export function ProjectLibraryPage() {
 
         <div className="library__content">
           <section className="library__intro">
-            <span>龙文创作系统</span>
+            <span>坤雷创作系统</span>
             <h1>
               从一个<em>念头</em>，<span>启动一条小说生产线</span>
             </h1>
