@@ -5,6 +5,25 @@ import type { DocumentKind, Project } from '@/app/types/studio';
 
 import { GROUPS, SECTIONS } from './studioConstants';
 
+const SECTION_LABELS: Record<(typeof SECTIONS)[number][0], string> = {
+  manuscript: '正文写作',
+  outline: '故事大纲',
+  characters: '人物角色',
+  world: '世界观',
+  review: '质量检查',
+  history: '版本记录',
+  export: '出版导出',
+  settings: '项目设置',
+};
+
+const GROUP_LABELS: Record<DocumentKind, string> = {
+  chapter: '正文篇章',
+  outline: '故事大纲',
+  character: '人物角色',
+  world: '世界设定',
+  note: '创作笔记',
+};
+
 interface SearchResult {
   document_id: string;
   title: string;
@@ -49,25 +68,25 @@ export function StudioNavigator({
 
   return (
     <aside className="studio-nav">
-      <nav className="section-nav" aria-label="Project sections">
-        {SECTIONS.map(([path, label]) => (
+      <nav className="section-nav" aria-label="作品创作区">
+        {SECTIONS.map(([path]) => (
           <button
             className={section === path ? 'active' : ''}
             key={path}
             onClick={() => onNavigateSection(path)}
             type="button"
           >
-            {label}
+            {SECTION_LABELS[path]}
           </button>
         ))}
       </nav>
       <form className="studio-search" onSubmit={onSearchSubmit}>
         {isSearching ? <Loader2 className="spin" /> : <Search />}
         <input
-          aria-label="Search project"
+          aria-label="搜索作品内容"
           disabled={isSearching}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Search documents"
+          placeholder="搜索正文、设定与笔记"
           value={search}
         />
       </form>
@@ -88,13 +107,19 @@ export function StudioNavigator({
       <div className="document-tree">
         {visibleGroups.map(({ kind, label, icon: Icon }) => {
           const documents = project.documents?.filter((document) => document.kind === kind) ?? [];
+          const displayLabel = GROUP_LABELS[kind];
           return (
             <section className="document-group" key={kind}>
               <header>
                 <span>
-                  <Icon /> {label}
+                  <Icon /> {displayLabel}
                 </span>
-                <button onClick={() => onCreateDocument(kind)} title={`Add ${label}`} type="button">
+                <button
+                  aria-label={`Add ${label}`}
+                  onClick={() => onCreateDocument(kind)}
+                  title={`新增${displayLabel}`}
+                  type="button"
+                >
                   <Plus />
                 </button>
               </header>
@@ -116,7 +141,7 @@ export function StudioNavigator({
                     <button
                       disabled={index === 0}
                       onClick={() => onMoveDocument(document.id, -1)}
-                      title="Move up"
+                      title="向上移动"
                       type="button"
                     >
                       <ArrowUp />
@@ -124,7 +149,7 @@ export function StudioNavigator({
                     <button
                       disabled={index === documents.length - 1}
                       onClick={() => onMoveDocument(document.id, 1)}
-                      title="Move down"
+                      title="向下移动"
                       type="button"
                     >
                       <ArrowDown />
