@@ -1,8 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-test('guest writes, accepts an AI proposal, reviews history, and exports', async ({ page }) => {
+test('owner writes, accepts an AI proposal, reviews history, and exports', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: /24-hour guest studio/i }).click();
+  await page.getByLabel('账号').fill('kunlei-test-owner');
+  await page.getByLabel('密码').fill('Kunlei-Test-Owner-2026!');
+  await page.getByRole('button', { name: '创建并登录' }).click();
   await expect(page).toHaveURL(/\/projects$/);
 
   await page.getByLabel('Title').fill('The Glass Harbor');
