@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, type CSSProperties, type FormEvent } from 'react';
 import {
   Activity,
   BookOpen,
@@ -22,6 +22,17 @@ const ENTRY_WORKFLOW = [
   { label: '版本与回退', icon: History },
   { label: '质量与交付', icon: ShieldCheck },
 ] as const;
+
+const HERO_IMAGE_STYLE: CSSProperties = {
+  width: '100%',
+  maxHeight: 330,
+  marginTop: 24,
+  border: '1px solid rgba(81, 230, 194, .2)',
+  borderRadius: 12,
+  objectFit: 'cover',
+  objectPosition: 'center 46%',
+  boxShadow: '0 24px 55px rgba(0, 0, 0, .3)',
+};
 
 export function EntryPage() {
   const navigate = useNavigate();
@@ -113,16 +124,7 @@ export function EntryPage() {
             <img
               alt="灯火照亮书稿，远山与楼阁构成故事世界"
               src="/kunlei-novel-factory-login-v1.png"
-              style={{
-                width: '100%',
-                maxHeight: 330,
-                marginTop: 24,
-                border: '1px solid rgba(81, 230, 194, .2)',
-                borderRadius: 12,
-                objectFit: 'cover',
-                objectPosition: 'center 46%',
-                boxShadow: '0 24px 55px rgba(0, 0, 0, .3)',
-              }}
+              style={HERO_IMAGE_STYLE}
             />
           </section>
 
