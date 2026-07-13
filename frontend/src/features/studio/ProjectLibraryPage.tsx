@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Activity,
   BookOpen,
@@ -12,7 +12,6 @@ import {
   ListTree,
   LogOut,
   PenLine,
-  Plus,
   ShieldCheck,
   Users,
 } from 'lucide-react';
@@ -20,12 +19,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { api } from '@/app/api';
 import type { Project } from '@/app/types/studio';
-
-const STORY_FORMATS = [
-  { value: '短篇故事', detail: '1 万字以内' },
-  { value: '中长篇', detail: '5 万—30 万字' },
-  { value: '长篇连载', detail: '30 万字以上' },
-] as const;
+import { CreativeWorkshop } from '@/features/studio/CreativeWorkshop';
 
 const WORKFLOW_ITEMS = [
   { label: '正文写作', icon: PenLine },
@@ -53,12 +47,7 @@ function formatProjectDate(value: string): string {
 export function ProjectLibraryPage() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [storyFormat, setStoryFormat] = useState<(typeof STORY_FORMATS)[number]['value']>('中长篇');
-  const [genre, setGenre] = useState('悬疑');
-  const [isCreating, setIsCreating] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -74,20 +63,6 @@ export function ProjectLibraryPage() {
     void load();
   }, [load]);
 
-  const createProject = async (event: FormEvent) => {
-    event.preventDefault();
-    setError(null);
-    setIsCreating(true);
-    try {
-      const premise = [`${storyFormat} · ${genre}`, description.trim()].filter(Boolean).join('｜');
-      const project = await api.createProject(title.trim(), premise);
-      navigate(`/projects/${project.id}/manuscript`);
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : '项目创建失败，请稍后再试。');
-      setIsCreating(false);
-    }
-  };
-
   const logout = async () => {
     try {
       await api.logout();
@@ -99,7 +74,7 @@ export function ProjectLibraryPage() {
   };
 
   return (
-    <main className="library">
+    <main className="library library--workshop">
       <aside className="library-sidebar">
         <div className="library-sidebar__brand">
           <span className="library-sidebar__brand-mark" aria-hidden="true">
@@ -153,16 +128,8 @@ export function ProjectLibraryPage() {
         <div className="library__content">
           <section className="library__intro">
             <span>坤雷创作系统</span>
-            <h1>
-              从一个<em>念头</em>，<span>启动一条小说生产线</span>
-            </h1>
-            <p>把灵感送入创作流程，让大纲、人物、正文和质量检查在同一座工厂里持续推进。</p>
-            <div className="library__signal" aria-hidden="true">
-              <span>
-                <Feather />
-              </span>
-              <small>灵感核心</small>
-            </div>
+            <h1>创意工坊</h1>
+            <p>先定义方向，再让不同的故事可能性彼此竞争。</p>
           </section>
 
           <ol className="creation-path" aria-label="小说生产流程">
@@ -175,80 +142,9 @@ export function ProjectLibraryPage() {
             ))}
           </ol>
 
+          <CreativeWorkshop />
+
           <div className="library__grid">
-            <form className="project-create" id="create-project" onSubmit={createProject}>
-              <header>
-                <div>
-                  <span>新作品</span>
-                  <h2>新建创意项目</h2>
-                </div>
-                <Lightbulb aria-hidden="true" />
-              </header>
-
-              <fieldset className="story-format">
-                <legend>选择篇幅</legend>
-                <div>
-                  {STORY_FORMATS.map((option) => (
-                    <button
-                      aria-pressed={storyFormat === option.value}
-                      className={storyFormat === option.value ? 'selected' : ''}
-                      key={option.value}
-                      onClick={() => setStoryFormat(option.value)}
-                      type="button"
-                    >
-                      <strong>{option.value}</strong>
-                      <small>{option.detail}</small>
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
-
-              <label>
-                <span>故事类型</span>
-                <select value={genre} onChange={(event) => setGenre(event.target.value)}>
-                  <option>悬疑</option>
-                  <option>都市</option>
-                  <option>科幻</option>
-                  <option>奇幻</option>
-                  <option>历史</option>
-                  <option>言情</option>
-                  <option>现实主义</option>
-                </select>
-              </label>
-              <label>
-                <span>作品名称</span>
-                <input
-                  aria-label="Title"
-                  maxLength={80}
-                  onChange={(event) => setTitle(event.target.value)}
-                  placeholder="给这个故事起一个暂定名"
-                  required
-                  value={title}
-                />
-              </label>
-              <label>
-                <span>核心创意</span>
-                <textarea
-                  maxLength={500}
-                  onChange={(event) => setDescription(event.target.value)}
-                  placeholder="主角是谁？他想要什么？最大的阻碍是什么？"
-                  rows={5}
-                  value={description}
-                />
-                <small className="field-count">{description.length}/500</small>
-              </label>
-              {error ? <p className="form-error">{error}</p> : null}
-              <button
-                aria-label="Create project"
-                className="command command--primary project-create__submit"
-                disabled={isCreating}
-                type="submit"
-              >
-                <Plus aria-hidden="true" />
-                {isCreating ? '正在创建…' : '创建创意项目'}
-              </button>
-            </form>
-
             <section className="recent-projects" id="recent-projects">
               <header>
                 <div>
