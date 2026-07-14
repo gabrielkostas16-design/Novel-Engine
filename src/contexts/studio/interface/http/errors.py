@@ -11,13 +11,16 @@ from src.contexts.studio.domain.exceptions import (
     InvalidOperation,
     NotFound,
     RevisionConflict,
+    StateConflict,
 )
 
 P = ParamSpec("P")
 T = TypeVar("T")
 
 
-def _raise_http(exc: NotFound | RevisionConflict | InvalidOperation) -> NoReturn:
+def _raise_http(
+    exc: NotFound | RevisionConflict | StateConflict | InvalidOperation,
+) -> NoReturn:
     if isinstance(exc, NotFound):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)
@@ -28,6 +31,14 @@ def _raise_http(exc: NotFound | RevisionConflict | InvalidOperation) -> NoReturn
             detail={
                 "message": str(exc),
                 "current_revision_id": exc.current_revision_id,
+            },
+        ) from exc
+    if isinstance(exc, StateConflict):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={
+                "message": str(exc),
+                "current_version": exc.current_version,
             },
         ) from exc
     raise HTTPException(
@@ -45,7 +56,7 @@ def _handle_domain_exceptions(
     async def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         try:
             return await handler(*args, **kwargs)
-        except (NotFound, RevisionConflict, InvalidOperation) as exc:
+        except (NotFound, RevisionConflict, StateConflict, InvalidOperation) as exc:
             _raise_http(exc)
 
     wrapper.__dict__["__signature__"] = resolved_signature
