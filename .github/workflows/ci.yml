@@ -175,4 +175,4 @@ jobs:
           done
           curl -fsS http://127.0.0.1:8000/health/ready
           curl -fsS -b cookies.txt http://127.0.0.1:8000/api/session | grep -q '"kind":"owner"'
-          docker exec novel-studio python -c "import sqlite3; connection=sqlite3.connect('/app/data/novel-engine.sqlite3'); assert connection.execute('PRAGMA quick_check').fetchone() == ('ok',); assert connection.execute('SELECT version_num FROM alembic_version').fetchone() == ('0003_add_csrf_token_to_sessions',)"
+          docker exec novel-studio python -c "import sqlite3; from alembic.config import Config; from alembic.script import ScriptDirectory; connection=sqlite3.connect('/app/data/novel-engine.sqlite3'); expected=ScriptDirectory.from_config(Config('/app/alembic.ini')).get_current_head(); actual=connection.execute('SELECT version_num FROM alembic_version').fetchone()[0]; assert connection.execute('PRAGMA quick_check').fetchone() == ('ok',); assert actual == expected, (actual, expected)"
