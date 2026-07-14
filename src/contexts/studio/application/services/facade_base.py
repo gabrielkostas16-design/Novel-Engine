@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from typing import cast
 
 from src.contexts.studio.application.ports import ExportFormatWriter
+from src.contexts.studio.application.ports.creative_repository import CreativeRepository
 from src.contexts.studio.application.service_common import (
     ExportFormat,
     Path,
@@ -11,6 +13,7 @@ from src.contexts.studio.application.service_common import (
 )
 from src.contexts.studio.application.services.ai_service import AIService
 from src.contexts.studio.application.services.auth_service import AuthService
+from src.contexts.studio.application.services.creative_service import CreativeService
 from src.contexts.studio.application.services.document_service import DocumentService
 from src.contexts.studio.application.services.export_service import ExportService
 from src.contexts.studio.application.services.import_service import ImportService
@@ -39,6 +42,7 @@ class StudioServiceRegistry:
     def _build_services(self) -> None:
         repository = self.repository
         self.auth = AuthService(repository)
+        self.creative_service = CreativeService(cast(CreativeRepository, repository))
         self.project_service = ProjectService(repository)
         self.document_service = DocumentService(repository)
         self.revision_service = RevisionService(repository, self.document_service)
