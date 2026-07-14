@@ -2,6 +2,9 @@
 
 from src.contexts.studio.infrastructure.repository.auth import AuthRepositoryMixin
 from src.contexts.studio.infrastructure.repository.base import RepositoryBase
+from src.contexts.studio.infrastructure.repository.creative_confirmation import (
+    CreativeRepositoryMixin,
+)
 from src.contexts.studio.infrastructure.repository.document import (
     DocumentRepositoryMixin,
 )
@@ -16,6 +19,7 @@ from src.contexts.studio.infrastructure.repository.snapshot import (
 
 class SqlAlchemyStudioRepository(
     AuthRepositoryMixin,
+    CreativeRepositoryMixin,
     ProjectRepositoryMixin,
     DocumentRepositoryMixin,
     SnapshotRepositoryMixin,
