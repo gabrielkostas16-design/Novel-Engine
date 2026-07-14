@@ -17,3 +17,11 @@ class NotFound(RuntimeError):
 
 class InvalidOperation(RuntimeError):
     """Raised when a valid resource cannot perform an operation."""
+
+
+class StateConflict(RuntimeError):
+    """Raised when a command targets stale state or reuses an idempotency key."""
+
+    def __init__(self, message: str, *, current_version: int | None = None) -> None:
+        super().__init__(message)
+        self.current_version = current_version

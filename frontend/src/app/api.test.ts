@@ -129,4 +129,40 @@ describe('Studio API client', () => {
     const headers = init?.headers as Record<string, string> | undefined;
     expect(headers?.['X-CSRF-Token']).toBeUndefined();
   });
+
+  it('parses the persisted creative bundle contract', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            brief: {
+              id: 'brief-1',
+              story_format: 'medium',
+              genre: '悬疑',
+              theme: '真相',
+              target_reader: '',
+              platform: '',
+              style: '',
+              premise: 'A premise',
+              preferences: '',
+              status: 'comparing',
+              version: 2,
+              created_at: '2026-07-14T00:00:00Z',
+              updated_at: '2026-07-14T00:00:00Z',
+            },
+            candidates: [],
+            decision: null,
+            story_seed: null,
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        ),
+      ),
+    );
+
+    await expect(api.creativeBrief('brief-1')).resolves.toMatchObject({
+      brief: { id: 'brief-1', version: 2 },
+      candidates: [],
+    });
+  });
 });

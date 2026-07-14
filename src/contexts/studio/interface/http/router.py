@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from src.contexts.studio.interface.http.creative_router import creative_router
 from src.contexts.studio.interface.http.project_router import project_router
 from src.contexts.studio.interface.http.session_router import (
     get_principal,
@@ -9,6 +10,7 @@ from src.contexts.studio.interface.http.workflow_router import workflow_router
 
 router = APIRouter()
 router.include_router(session_router)
+router.include_router(creative_router)
 router.include_router(project_router)
 router.include_router(workflow_router)
 

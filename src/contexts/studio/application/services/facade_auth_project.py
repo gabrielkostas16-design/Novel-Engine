@@ -76,3 +76,85 @@ class AuthProjectFacade(StudioServiceRegistry):
 
     def delete_project(self, principal: Principal, project_id: str) -> None:
         return self.project_service.delete_project(principal, project_id)
+
+    def create_creative_brief(
+        self,
+        principal: Principal,
+        *,
+        values: dict[str, Any],
+        idempotency_key: str,
+    ) -> dict[str, Any]:
+        return self.creative_service.create_brief(
+            principal,
+            values=values,
+            idempotency_key=idempotency_key,
+        )
+
+    def get_creative_bundle(
+        self, principal: Principal, brief_id: str
+    ) -> dict[str, Any]:
+        return self.creative_service.get_bundle(principal, brief_id)
+
+    def update_creative_brief(
+        self,
+        principal: Principal,
+        brief_id: str,
+        *,
+        base_version: int,
+        changes: dict[str, Any],
+    ) -> dict[str, Any]:
+        return self.creative_service.update_brief(
+            principal,
+            brief_id,
+            base_version=base_version,
+            changes=changes,
+        )
+
+    def save_rule_candidates(
+        self,
+        principal: Principal,
+        brief_id: str,
+        *,
+        base_version: int,
+        candidates: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        return self.creative_service.save_rule_candidates(
+            principal,
+            brief_id,
+            base_version=base_version,
+            candidates=candidates,
+        )
+
+    def confirm_creative_brief(
+        self,
+        principal: Principal,
+        brief_id: str,
+        *,
+        base_version: int,
+        selected_candidate_id: str,
+        merged_candidate_ids: list[str],
+        rejected_candidate_ids: list[str],
+        idempotency_key: str,
+    ) -> dict[str, Any]:
+        return self.creative_service.confirm_brief(
+            principal,
+            brief_id,
+            base_version=base_version,
+            selected_candidate_id=selected_candidate_id,
+            merged_candidate_ids=merged_candidate_ids,
+            rejected_candidate_ids=rejected_candidate_ids,
+            idempotency_key=idempotency_key,
+        )
+
+    def abandon_creative_brief(
+        self,
+        principal: Principal,
+        brief_id: str,
+        *,
+        base_version: int,
+    ) -> dict[str, Any]:
+        return self.creative_service.abandon_brief(
+            principal,
+            brief_id,
+            base_version=base_version,
+        )

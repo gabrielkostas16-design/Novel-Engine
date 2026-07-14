@@ -116,6 +116,56 @@ class CreativeBundleRequest(_CreativeContract):
         return self
 
 
+class CreativeBriefCreateRequest(_CreativeContract):
+    story_format: StoryFormat
+    genre: str = Field(min_length=1, max_length=120)
+    theme: str = Field(default="", max_length=240)
+    target_reader: str = Field(default="", max_length=240)
+    platform: str = Field(default="", max_length=120)
+    style: str = Field(default="", max_length=240)
+    premise: str = Field(min_length=1, max_length=2_000)
+    preferences: str = Field(default="", max_length=2_000)
+
+
+class CreativeBriefPatchRequest(_CreativeContract):
+    base_version: int = Field(ge=1)
+    story_format: StoryFormat | None = None
+    genre: str | None = Field(default=None, min_length=1, max_length=120)
+    theme: str | None = Field(default=None, max_length=240)
+    target_reader: str | None = Field(default=None, max_length=240)
+    platform: str | None = Field(default=None, max_length=120)
+    style: str | None = Field(default=None, max_length=240)
+    premise: str | None = Field(default=None, min_length=1, max_length=2_000)
+    preferences: str | None = Field(default=None, max_length=2_000)
+
+
+class RuleCandidateInput(_CreativeContract):
+    title: str = Field(min_length=1, max_length=240)
+    logline: str = Field(min_length=1, max_length=2_000)
+    core_conflict: str = Field(min_length=1, max_length=2_000)
+    emotional_promise: str = Field(default="", max_length=1_000)
+    audience_fit: str = Field(default="", max_length=1_000)
+    scalability: str = Field(default="", max_length=1_000)
+    difficulty: str = Field(default="", max_length=1_000)
+    risk: str = Field(default="", max_length=1_000)
+
+
+class RuleCandidatesRequest(_CreativeContract):
+    base_version: int = Field(ge=1)
+    candidates: list[RuleCandidateInput] = Field(min_length=2, max_length=5)
+
+
+class CreativeDecisionCreateRequest(_CreativeContract):
+    base_version: int = Field(ge=1)
+    selected_candidate_id: str = Field(min_length=1, max_length=120)
+    merged_candidate_ids: list[str] = Field(default_factory=list, max_length=4)
+    rejected_candidate_ids: list[str] = Field(default_factory=list, max_length=4)
+
+
+class CreativeAbandonRequest(_CreativeContract):
+    base_version: int = Field(ge=1)
+
+
 class OwnerSetupRequest(BaseModel):
     username: str = Field(min_length=1, max_length=120)
     password: str = Field(min_length=10, max_length=200)
