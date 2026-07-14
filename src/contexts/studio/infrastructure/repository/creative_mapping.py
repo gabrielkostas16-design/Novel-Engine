@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import cast
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -12,8 +14,10 @@ from src.contexts.studio.application.ports.creative_repository import (
 )
 from src.contexts.studio.domain.creative import (
     CreativeBrief,
+    IdeaSource,
     IdeaCandidate,
     SelectionDecision,
+    StoryFormat,
     StorySeed,
 )
 from src.contexts.studio.domain.exceptions import InvalidOperation
@@ -30,7 +34,7 @@ def _brief_dto(record: CreativeBriefRecord) -> CreativeBriefDto:
     return CreativeBriefDto(
         brief=CreativeBrief(
             id=record.id,
-            story_format=record.story_format,  # type: ignore[arg-type]
+            story_format=cast(StoryFormat, record.story_format),
             genre=record.genre,
             theme=record.theme,
             target_reader=record.target_reader,
@@ -59,7 +63,7 @@ def _candidate_dto(record: IdeaCandidateRecord) -> IdeaCandidateDto:
             scalability=record.scalability,
             difficulty=record.difficulty,
             risk=record.risk,
-            source=record.source,  # type: ignore[arg-type]
+            source=cast(IdeaSource, record.source),
             source_job_id=record.source_job_id,
             source_proposal_id=record.source_proposal_id,
         ),
