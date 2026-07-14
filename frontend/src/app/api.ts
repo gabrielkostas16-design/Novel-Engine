@@ -20,6 +20,11 @@ import {
   parseReview,
   parseReviews,
 } from '@/app/apiWorkflowContract';
+import {
+  parseCreativeBundle,
+  type CreativeBriefInput,
+  type RuleCandidateInput,
+} from '@/app/apiCreativeContract';
 import type { DocumentKind, ExportFormat } from '@/app/types/studio';
 
 export class HttpError extends Error {
@@ -156,6 +161,47 @@ export const api = {
   project: (projectId: string) => request(`/api/projects/${projectId}`, undefined, parseProject),
   createProject: (title: string, description: string) =>
     postJson('/api/projects', { title, description }, parseProject),
+  createCreativeBrief: (payload: CreativeBriefInput, idempotencyKey: string) =>
+    request(
+      '/api/creative-briefs',
+      {
+        method: 'POST',
+        body: json(payload),
+        headers: { 'Idempotency-Key': idempotencyKey },
+      },
+      parseCreativeBundle,
+    ),
+  creativeBrief: (briefId: string) =>
+    request(`/api/creative-briefs/${briefId}`, undefined, parseCreativeBundle),
+  updateCreativeBrief: (
+    briefId: string,
+    payload: Partial<CreativeBriefInput> & { base_version: number },
+  ) => patchJson(`/api/creative-briefs/${briefId}`, payload, parseCreativeBundle),
+  saveRuleCandidates: (briefId: string, baseVersion: number, candidates: RuleCandidateInput[]) =>
+    postJson(
+      `/api/creative-briefs/${briefId}/rule-candidates`,
+      { base_version: baseVersion, candidates },
+      parseCreativeBundle,
+    ),
+  confirmCreativeBrief: (
+    briefId: string,
+    payload: {
+      base_version: number;
+      selected_candidate_id: string;
+      merged_candidate_ids: string[];
+      rejected_candidate_ids: string[];
+    },
+    idempotencyKey: string,
+  ) =>
+    request(
+      `/api/creative-briefs/${briefId}/decisions`,
+      {
+        method: 'POST',
+        body: json(payload),
+        headers: { 'Idempotency-Key': idempotencyKey },
+      },
+      parseCreativeBundle,
+    ),
   createDocument: (
     projectId: string,
     payload: {
