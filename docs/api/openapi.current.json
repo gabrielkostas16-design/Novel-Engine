@@ -75,6 +75,239 @@
         "title": "ComponentStatusResponse",
         "type": "object"
       },
+      "CreativeAbandonRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "base_version": {
+            "minimum": 1.0,
+            "title": "Base Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "base_version"
+        ],
+        "title": "CreativeAbandonRequest",
+        "type": "object"
+      },
+      "CreativeBriefCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "genre": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Genre",
+            "type": "string"
+          },
+          "platform": {
+            "default": "",
+            "maxLength": 120,
+            "title": "Platform",
+            "type": "string"
+          },
+          "preferences": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Preferences",
+            "type": "string"
+          },
+          "premise": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Premise",
+            "type": "string"
+          },
+          "story_format": {
+            "enum": [
+              "short",
+              "medium",
+              "long_serial"
+            ],
+            "title": "Story Format",
+            "type": "string"
+          },
+          "style": {
+            "default": "",
+            "maxLength": 240,
+            "title": "Style",
+            "type": "string"
+          },
+          "target_reader": {
+            "default": "",
+            "maxLength": 240,
+            "title": "Target Reader",
+            "type": "string"
+          },
+          "theme": {
+            "default": "",
+            "maxLength": 240,
+            "title": "Theme",
+            "type": "string"
+          }
+        },
+        "required": [
+          "story_format",
+          "genre",
+          "premise"
+        ],
+        "title": "CreativeBriefCreateRequest",
+        "type": "object"
+      },
+      "CreativeBriefPatchRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "base_version": {
+            "minimum": 1.0,
+            "title": "Base Version",
+            "type": "integer"
+          },
+          "genre": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Genre"
+          },
+          "platform": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Platform"
+          },
+          "preferences": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferences"
+          },
+          "premise": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Premise"
+          },
+          "story_format": {
+            "anyOf": [
+              {
+                "enum": [
+                  "short",
+                  "medium",
+                  "long_serial"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Story Format"
+          },
+          "style": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style"
+          },
+          "target_reader": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Reader"
+          },
+          "theme": {
+            "anyOf": [
+              {
+                "maxLength": 240,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Theme"
+          }
+        },
+        "required": [
+          "base_version"
+        ],
+        "title": "CreativeBriefPatchRequest",
+        "type": "object"
+      },
+      "CreativeDecisionCreateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "base_version": {
+            "minimum": 1.0,
+            "title": "Base Version",
+            "type": "integer"
+          },
+          "merged_candidate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 4,
+            "title": "Merged Candidate Ids",
+            "type": "array"
+          },
+          "rejected_candidate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 4,
+            "title": "Rejected Candidate Ids",
+            "type": "array"
+          },
+          "selected_candidate_id": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Selected Candidate Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "base_version",
+          "selected_candidate_id"
+        ],
+        "title": "CreativeDecisionCreateRequest",
+        "type": "object"
+      },
       "DetailedHealthResponse": {
         "description": "Detailed health payload returned by `/health`.",
         "properties": {
@@ -380,6 +613,91 @@
         "title": "ReorderRequest",
         "type": "object"
       },
+      "RuleCandidateInput": {
+        "additionalProperties": false,
+        "properties": {
+          "audience_fit": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Audience Fit",
+            "type": "string"
+          },
+          "core_conflict": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Core Conflict",
+            "type": "string"
+          },
+          "difficulty": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Difficulty",
+            "type": "string"
+          },
+          "emotional_promise": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Emotional Promise",
+            "type": "string"
+          },
+          "logline": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Logline",
+            "type": "string"
+          },
+          "risk": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Risk",
+            "type": "string"
+          },
+          "scalability": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Scalability",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 240,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "logline",
+          "core_conflict"
+        ],
+        "title": "RuleCandidateInput",
+        "type": "object"
+      },
+      "RuleCandidatesRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "base_version": {
+            "minimum": 1.0,
+            "title": "Base Version",
+            "type": "integer"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/RuleCandidateInput"
+            },
+            "maxItems": 5,
+            "minItems": 2,
+            "title": "Candidates",
+            "type": "array"
+          }
+        },
+        "required": [
+          "base_version",
+          "candidates"
+        ],
+        "title": "RuleCandidatesRequest",
+        "type": "object"
+      },
       "SimpleHealthResponse": {
         "description": "Simple liveness and readiness response.",
         "properties": {
@@ -474,6 +792,427 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/creative-briefs": {
+      "post": {
+        "operationId": "create_creative_brief_api_creative_briefs_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "novel_studio_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Novel Studio Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreativeBriefCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Create Creative Brief Api Creative Briefs Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Creative Brief",
+        "tags": [
+          "creative"
+        ]
+      }
+    },
+    "/api/creative-briefs/{brief_id}": {
+      "get": {
+        "operationId": "get_creative_brief_api_creative_briefs__brief_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "brief_id",
+            "required": true,
+            "schema": {
+              "title": "Brief Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "novel_studio_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Novel Studio Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Creative Brief Api Creative Briefs  Brief Id  Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Creative Brief",
+        "tags": [
+          "creative"
+        ]
+      },
+      "patch": {
+        "operationId": "update_creative_brief_api_creative_briefs__brief_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "brief_id",
+            "required": true,
+            "schema": {
+              "title": "Brief Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "novel_studio_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Novel Studio Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreativeBriefPatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Update Creative Brief Api Creative Briefs  Brief Id  Patch",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Creative Brief",
+        "tags": [
+          "creative"
+        ]
+      }
+    },
+    "/api/creative-briefs/{brief_id}/abandon": {
+      "post": {
+        "operationId": "abandon_creative_brief_api_creative_briefs__brief_id__abandon_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "brief_id",
+            "required": true,
+            "schema": {
+              "title": "Brief Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "novel_studio_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Novel Studio Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreativeAbandonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Abandon Creative Brief Api Creative Briefs  Brief Id  Abandon Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Abandon Creative Brief",
+        "tags": [
+          "creative"
+        ]
+      }
+    },
+    "/api/creative-briefs/{brief_id}/decisions": {
+      "post": {
+        "operationId": "confirm_creative_brief_api_creative_briefs__brief_id__decisions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "brief_id",
+            "required": true,
+            "schema": {
+              "title": "Brief Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "novel_studio_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Novel Studio Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreativeDecisionCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Confirm Creative Brief Api Creative Briefs  Brief Id  Decisions Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm Creative Brief",
+        "tags": [
+          "creative"
+        ]
+      }
+    },
+    "/api/creative-briefs/{brief_id}/rule-candidates": {
+      "post": {
+        "operationId": "save_rule_candidates_api_creative_briefs__brief_id__rule_candidates_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "brief_id",
+            "required": true,
+            "schema": {
+              "title": "Brief Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "novel_studio_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Novel Studio Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleCandidatesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Save Rule Candidates Api Creative Briefs  Brief Id  Rule Candidates Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save Rule Candidates",
+        "tags": [
+          "creative"
+        ]
+      }
+    },
     "/api/imports": {
       "post": {
         "operationId": "import_workspace_api_imports_post",
