@@ -12,6 +12,14 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from src.contexts.studio.infrastructure.creative_models import (
+    CreativeBriefRecord,
+    IdeaCandidateRecord,
+    IdempotencyRecord,
+    SelectionDecisionItemRecord,
+    SelectionDecisionRecord,
+    StorySeedRecord,
+)
 from src.contexts.studio.infrastructure.model_base import Base
 from src.contexts.studio.infrastructure.workflow_models import (
     Export,
@@ -24,18 +32,24 @@ from src.contexts.studio.infrastructure.workflow_models import (
 
 __all__ = [
     "Base",
+    "CreativeBriefRecord",
     "Document",
     "DocumentRevision",
     "Export",
     "Job",
     "JobEvent",
+    "IdeaCandidateRecord",
+    "IdempotencyRecord",
     "Owner",
     "Project",
     "ProjectSnapshot",
     "Review",
     "ReviewIssue",
+    "SelectionDecisionItemRecord",
+    "SelectionDecisionRecord",
     "SessionRecord",
     "SnapshotDocument",
+    "StorySeedRecord",
     "UsageEvent",
 ]
 
