@@ -1,0 +1,1 @@
+672b8bc366e9f5b5df41dee69676d67fbc642ce64779a5714ee402c0ca84c7e0  alembic/versions/0004_creative_bundle_persistence.py

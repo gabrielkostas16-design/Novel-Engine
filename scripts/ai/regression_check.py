@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
 import re
 import subprocess
@@ -19,6 +20,8 @@ from scripts.ai.regression_diff import DiffDetails, parse_diff
 DEFAULT_MAX_FILES: Final = 5
 GUARDRAIL_FILE: Final = "scripts/ai/regression_check.py"
 GUARDRAIL_TEST_PREFIX: Final = "tests/unit/scripts/ai/test_regression_check"
+APPROVED_MIGRATIONS_FILE: Final = "scripts/ai/approved_migrations.txt"
+MIGRATION_PREFIX: Final = "alembic/versions/"
 STRING_CONTENT_TOKEN_NAMES: Final = frozenset({"STRING", "FSTRING_MIDDLE"})
 SAFETY_KEYWORDS: Final = (
     "raise",
@@ -28,12 +31,7 @@ SAFETY_KEYWORDS: Final = (
     "auth",
     "permission",
 )
-FORBIDDEN_PREFIXES: Final = (
-    "alembic/versions/",
-    ".env",
-    "config/env/",
-    "data/",
-)
+FORBIDDEN_PREFIXES: Final = (MIGRATION_PREFIX, ".env", "config/env/", "data/")
 
 
 @dataclass(frozen=True, slots=True)
@@ -93,6 +91,28 @@ def _project_root() -> Path:
 
 
 PROJECT_ROOT: Final = _project_root()
+
+
+def load_approved_migrations(base_ref: str | None) -> dict[str, str]:
+    if base_ref is None:
+        return {}
+    result = subprocess.run(
+        ["git", "show", f"{base_ref}:{APPROVED_MIGRATIONS_FILE}"],
+        cwd=PROJECT_ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return {}
+    approved: dict[str, str] = {}
+    for line in result.stdout.splitlines():
+        digest, separator, path = line.partition(" ")
+        path = path.strip()
+        valid_digest = re.fullmatch(r"[0-9a-fA-F]{64}", digest)
+        valid_path = path.startswith(MIGRATION_PREFIX) and path.endswith(".py")
+        if separator and valid_digest and valid_path:
+            approved[path] = digest.lower()
+    return approved
 
 
 def build_diff_command(base_ref: str | None, head_ref: str | None) -> list[str]:
@@ -241,7 +261,11 @@ def _is_self_definition_line(filename: str, line: str) -> bool:
 
 
 def check_file_scope(
-    diff: DiffDetails, *, max_files: int, skip_file_count: bool
+    diff: DiffDetails,
+    *,
+    max_files: int,
+    skip_file_count: bool,
+    approved_migrations: dict[str, str] | None = None,
 ) -> list[str]:
     changed_files = diff.changed_files()
     issues: list[str] = []
@@ -250,9 +274,26 @@ def check_file_scope(
             f"AI changed {len(changed_files)} files. Consider splitting into smaller tasks."
         )
     for filename in sorted(changed_files):
-        if filename.startswith(FORBIDDEN_PREFIXES):
+        if filename.startswith(FORBIDDEN_PREFIXES) and not _is_exact_approved_migration(
+            diff, filename, approved_migrations or {}
+        ):
             issues.append(f"AI modified forbidden zone: {filename}")
     return issues
+
+
+def _is_exact_approved_migration(
+    diff: DiffDetails,
+    filename: str,
+    approved_migrations: dict[str, str],
+) -> bool:
+    is_new = filename not in diff.deletions and filename not in diff.deleted_files
+    if not filename.startswith(MIGRATION_PREFIX) or not is_new:
+        return False
+    try:
+        digest = hashlib.sha256((PROJECT_ROOT / filename).read_bytes()).hexdigest()
+    except OSError:
+        return False
+    return digest == approved_migrations.get(filename)
 
 
 def find_regressions(
@@ -260,6 +301,7 @@ def find_regressions(
     *,
     max_files: int = DEFAULT_MAX_FILES,
     skip_file_count: bool = False,
+    approved_migrations: dict[str, str] | None = None,
 ) -> list[str]:
     issues: list[str] = []
     issues.extend(check_deleted_safety_lines(diff))
@@ -267,7 +309,12 @@ def find_regressions(
     issues.extend(check_guardrail_self_modification(diff))
     issues.extend(check_dangerous_additions(diff))
     issues.extend(
-        check_file_scope(diff, max_files=max_files, skip_file_count=skip_file_count)
+        check_file_scope(
+            diff,
+            max_files=max_files,
+            skip_file_count=skip_file_count,
+            approved_migrations=approved_migrations,
+        )
     )
     return issues
 
@@ -297,6 +344,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         parse_diff(diff_text),
         max_files=args.max_files,
         skip_file_count=args.skip_file_count,
+        approved_migrations=load_approved_migrations(args.base_ref),
     )
     if not issues:
         write_line(
