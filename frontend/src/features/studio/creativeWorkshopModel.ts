@@ -20,6 +20,20 @@ export type Candidate = {
   discarded?: boolean;
 };
 
+export interface CreativeWorkshopState {
+  format: StoryFormat;
+  genre: string;
+  theme: string;
+  premise: string;
+  preferences: string;
+  candidates: Candidate[];
+  selectedId: string;
+  notice: string;
+  editingId: string | null;
+  draftHook: string;
+  isCreating: boolean;
+}
+
 export const ACTIVE_BRIEF_KEY = 'kunlei.activeCreativeBriefId';
 export const STORY_FORMAT_VALUES: Record<StoryFormat, CreativeBriefInput['story_format']> = {
   短篇故事: 'short',
@@ -59,6 +73,32 @@ export const fromBundle = (bundle: CreativeBundle): Candidate[] =>
     difficulty: candidate.difficulty,
     risk: candidate.risk,
   }));
+
+export function createCreativeWorkshopState(): CreativeWorkshopState {
+  const format: StoryFormat = '中长篇';
+  const theme = '真相与救赎';
+  const premise = '当一个人被迫隐瞒真相以保护所爱之人，真相是否还值得被发现？';
+  return {
+    format,
+    genre: '悬疑',
+    theme,
+    premise,
+    preferences: '禁区：宣扬暴力、低俗情节。\n偏好：逻辑严密、现实感强、反转合理。',
+    candidates: buildCandidates(theme, premise, format),
+    selectedId: 'B',
+    notice: '当前候选由本地规则草拟；模型 Job / Proposal 接入将在下一批完成。',
+    editingId: null,
+    draftHook: '',
+    isCreating: false,
+  };
+}
+
+export function creativeWorkshopReducer(
+  state: CreativeWorkshopState,
+  patch: Partial<CreativeWorkshopState>,
+): CreativeWorkshopState {
+  return { ...state, ...patch };
+}
 
 export function buildCandidates(theme: string, premise: string, format: StoryFormat): Candidate[] {
   const subject = premise.trim() || `一个关于「${theme || '真相与救赎'}」的选择`;

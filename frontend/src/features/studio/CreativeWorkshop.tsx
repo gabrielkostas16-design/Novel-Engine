@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useReducer, useRef, type FormEvent } from 'react';
 import { Lightbulb, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,29 +12,37 @@ import {
   STORY_FORMATS,
   buildCandidates,
   commandKey,
+  createCreativeWorkshopState,
+  creativeWorkshopReducer,
   fromBundle,
   toRuleCandidate,
   type Candidate,
-  type StoryFormat,
 } from './creativeWorkshopModel';
 
 // prettier-ignore
 export function CreativeWorkshop() {
   const navigate = useNavigate();
-  const [format, setFormat] = useState<StoryFormat>('中长篇');
-  const [genre, setGenre] = useState('悬疑');
-  const [theme, setTheme] = useState('真相与救赎');
-  const [premise, setPremise] = useState('当一个人被迫隐瞒真相以保护所爱之人，真相是否还值得被发现？');
-  const [preferences, setPreferences] = useState('禁区：宣扬暴力、低俗情节。\n偏好：逻辑严密、现实感强、反转合理。');
-  const [candidates, setCandidates] = useState(() => buildCandidates(theme, premise, format));
-  const [selectedId, setSelectedId] = useState('B');
-  const [mergedIds, setMergedIds] = useState<string[]>([]);
-  const [briefId, setBriefId] = useState<string | null>(null);
-  const [briefVersion, setBriefVersion] = useState<number | null>(null);
-  const [notice, setNotice] = useState('当前候选由本地规则草拟；模型 Job / Proposal 接入将在下一批完成。');
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [draftHook, setDraftHook] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
+  const [state, patchState] = useReducer(
+    creativeWorkshopReducer,
+    undefined,
+    createCreativeWorkshopState,
+  );
+  const briefIdRef = useRef<string | null>(null);
+  const briefVersionRef = useRef<number | null>(null);
+  const mergedIdsRef = useRef<string[]>([]);
+  const {
+    format,
+    genre,
+    theme,
+    premise,
+    preferences,
+    candidates,
+    selectedId,
+    notice,
+    editingId,
+    draftHook,
+    isCreating,
+  } = state;
   const selected = candidates.find((candidate) => candidate.id === selectedId) ?? candidates[0];
 
   useEffect(() => {
@@ -45,19 +53,20 @@ export function CreativeWorkshop() {
       .creativeBrief(savedBriefId)
       .then((bundle) => {
         if (!active) return;
-        setBriefId(bundle.brief.id);
-        setBriefVersion(bundle.brief.version);
-        setFormat(STORY_FORMAT_LABELS[bundle.brief.story_format]);
-        setGenre(bundle.brief.genre);
-        setTheme(bundle.brief.theme);
-        setPremise(bundle.brief.premise);
-        setPreferences(bundle.brief.preferences);
-        if (bundle.candidates.length) setCandidates(fromBundle(bundle));
-        setNotice(
-          bundle.brief.status === 'confirmed'
-            ? '已恢复确认完成的故事种子。'
-            : '已从本地服务恢复上次未完成的创意草稿。',
-        );
+        briefIdRef.current = bundle.brief.id;
+        briefVersionRef.current = bundle.brief.version;
+        patchState({
+          format: STORY_FORMAT_LABELS[bundle.brief.story_format],
+          genre: bundle.brief.genre,
+          theme: bundle.brief.theme,
+          premise: bundle.brief.premise,
+          preferences: bundle.brief.preferences,
+          ...(bundle.candidates.length ? { candidates: fromBundle(bundle) } : {}),
+          notice:
+            bundle.brief.status === 'confirmed'
+              ? '已恢复确认完成的故事种子。'
+              : '已从本地服务恢复上次未完成的创意草稿。',
+        });
       })
       .catch(() => localStorage.removeItem(ACTIVE_BRIEF_KEY));
     return () => {
@@ -78,9 +87,9 @@ export function CreativeWorkshop() {
 
   const persistDraft = async (items: Candidate[]): Promise<CreativeBundle> => {
     let bundle =
-      briefId && briefVersion
-        ? await api.updateCreativeBrief(briefId, {
-            base_version: briefVersion,
+      briefIdRef.current !== null && briefVersionRef.current !== null
+        ? await api.updateCreativeBrief(briefIdRef.current, {
+            base_version: briefVersionRef.current,
             ...creativeInput(),
           })
         : await api.createCreativeBrief(creativeInput(), commandKey('brief'));
@@ -90,64 +99,78 @@ export function CreativeWorkshop() {
       items.map(toRuleCandidate),
     );
     localStorage.setItem(ACTIVE_BRIEF_KEY, bundle.brief.id);
-    setBriefId(bundle.brief.id);
-    setBriefVersion(bundle.brief.version);
+    briefIdRef.current = bundle.brief.id;
+    briefVersionRef.current = bundle.brief.version;
     return bundle;
   };
 
   const regenerate = async (event: FormEvent) => {
     event.preventDefault();
-    setIsCreating(true);
+    patchState({ isCreating: true });
     const nextCandidates = buildCandidates(theme, premise, format);
     try {
       const bundle = await persistDraft(nextCandidates);
-      setCandidates(fromBundle(bundle));
-      setSelectedId('B');
-      setMergedIds([]);
-      setNotice('已生成并保存 3 个创意方向，刷新页面后仍可恢复。');
+      mergedIdsRef.current = [];
+      patchState({
+        candidates: fromBundle(bundle),
+        selectedId: 'B',
+        notice: '已生成并保存 3 个创意方向，刷新页面后仍可恢复。',
+      });
     } catch (reason) {
-      setNotice(reason instanceof Error ? reason.message : '创意草稿保存失败。');
+      patchState({ notice: reason instanceof Error ? reason.message : '创意草稿保存失败。' });
     } finally {
-      setIsCreating(false);
+      patchState({ isCreating: false });
     }
   };
   const toggleDiscard = (id: string) => {
-    setCandidates((items) => items.map((item) => (item.id === id ? { ...item, discarded: !item.discarded } : item)));
-    setMergedIds((items) => items.filter((item) => item !== id));
+    patchState({
+      candidates: candidates.map((item) =>
+        item.id === id ? { ...item, discarded: !item.discarded } : item,
+      ),
+    });
+    mergedIdsRef.current = mergedIdsRef.current.filter((item) => item !== id);
   };
   const mergeIntoSelected = (candidate: Candidate) => {
-    setCandidates((items) => items.map((item) => (item.id === selectedId ? { ...item, hook: `${item.hook} 同时吸收「${candidate.title}」的记忆疑点。` } : item)));
-    setMergedIds((items) => [...new Set([...items, candidate.id])]);
-    setNotice(`已将方向 ${candidate.id} 的关键疑点并入当前方向。`);
+    patchState({
+      candidates: candidates.map((item) =>
+        item.id === selectedId
+          ? { ...item, hook: `${item.hook} 同时吸收「${candidate.title}」的记忆疑点。` }
+          : item,
+      ),
+      notice: `已将方向 ${candidate.id} 的关键疑点并入当前方向。`,
+    });
+    mergedIdsRef.current = [...new Set([...mergedIdsRef.current, candidate.id])];
   };
   const editCandidate = (candidate: Candidate) => {
     if (editingId !== candidate.id) {
-      setEditingId(candidate.id);
-      setDraftHook(candidate.hook);
+      patchState({ editingId: candidate.id, draftHook: candidate.hook });
       return;
     }
     const hook = draftHook.trim();
     if (!hook) return;
-    setCandidates((items) => items.map((item) => (item.id === candidate.id ? { ...item, hook } : item)));
-    setEditingId(null);
-    setNotice(`已更新方向 ${candidate.id} 的故事钩子。`);
+    patchState({
+      candidates: candidates.map((item) => (item.id === candidate.id ? { ...item, hook } : item)),
+      editingId: null,
+      notice: `已更新方向 ${candidate.id} 的故事钩子。`,
+    });
   };
   const confirmSeed = async () => {
-    setIsCreating(true);
+    patchState({ isCreating: true });
     try {
       const bundle = await persistDraft(candidates);
       const persisted = fromBundle(bundle);
       const selectedIndex = candidates.findIndex((candidate) => candidate.id === selectedId);
       const selectedCandidateId = persisted[selectedIndex]?.backendId;
       if (!selectedCandidateId) throw new Error('当前选择未能保存，请重新生成候选。');
-      const mergedCandidateIds = candidates
-        .map((candidate, index) => (mergedIds.includes(candidate.id) ? persisted[index]?.backendId : null))
-        .filter((value): value is string => typeof value === 'string')
-        .filter((value) => value !== selectedCandidateId);
-      const rejectedCandidateIds = persisted
-        .map((candidate) => candidate.backendId)
-        .filter((value): value is string => typeof value === 'string')
-        .filter((value) => value !== selectedCandidateId && !mergedCandidateIds.includes(value));
+      const mergedIds = new Set(mergedIdsRef.current);
+      const mergedCandidateIds: string[] = [];
+      const rejectedCandidateIds: string[] = [];
+      for (const [index, candidate] of candidates.entries()) {
+        const backendId = persisted[index]?.backendId;
+        if (!backendId || backendId === selectedCandidateId) continue;
+        if (mergedIds.has(candidate.id)) mergedCandidateIds.push(backendId);
+        else rejectedCandidateIds.push(backendId);
+      }
       const confirmed = await api.confirmCreativeBrief(
         bundle.brief.id,
         {
@@ -163,8 +186,10 @@ export function CreativeWorkshop() {
       localStorage.removeItem(ACTIVE_BRIEF_KEY);
       navigate(`/projects/${projectId}/manuscript`);
     } catch (reason) {
-      setNotice(reason instanceof Error ? reason.message : '故事种子创建失败。');
-      setIsCreating(false);
+      patchState({
+        notice: reason instanceof Error ? reason.message : '故事种子创建失败。',
+        isCreating: false,
+      });
     }
   };
 
@@ -184,7 +209,7 @@ export function CreativeWorkshop() {
           <legend>篇幅</legend>
           <div className="creative-brief__formats">
             {STORY_FORMATS.map((item) => (
-              <button aria-pressed={format === item} className={format === item ? 'selected' : ''} key={item} onClick={() => setFormat(item)} type="button">
+              <button aria-pressed={format === item} className={format === item ? 'selected' : ''} key={item} onClick={() => patchState({ format: item })} type="button">
                 {item}
               </button>
             ))}
@@ -193,7 +218,7 @@ export function CreativeWorkshop() {
         <div className="creative-brief__row">
           <label>
             <span>类型</span>
-            <select value={genre} onChange={(event) => setGenre(event.target.value)}>
+            <select value={genre} onChange={(event) => patchState({ genre: event.target.value })}>
               <option>悬疑</option>
               <option>都市</option>
               <option>科幻</option>
@@ -204,7 +229,7 @@ export function CreativeWorkshop() {
           </label>
           <label>
             <span>主题</span>
-            <input value={theme} onChange={(event) => setTheme(event.target.value)} />
+            <input value={theme} onChange={(event) => patchState({ theme: event.target.value })} />
           </label>
         </div>
         <div className="creative-brief__row">
@@ -235,11 +260,11 @@ export function CreativeWorkshop() {
         </label>
         <label>
           <span>核心命题</span>
-          <textarea aria-label="Title" rows={2} value={premise} onChange={(event) => setPremise(event.target.value)} />
+          <textarea aria-label="Title" rows={2} value={premise} onChange={(event) => patchState({ premise: event.target.value })} />
         </label>
         <label>
           <span>禁区与作者偏好</span>
-          <textarea rows={3} value={preferences} onChange={(event) => setPreferences(event.target.value)} />
+          <textarea rows={3} value={preferences} onChange={(event) => patchState({ preferences: event.target.value })} />
         </label>
         <button className="creative-brief__generate" disabled={isCreating} type="submit">
           <Sparkles />
@@ -257,7 +282,7 @@ export function CreativeWorkshop() {
         </header>
         <div className="idea-compare__lanes">
           {candidates.map((candidate) => (
-            <CandidateLane candidate={candidate} draftHook={draftHook} editing={editingId === candidate.id} key={candidate.id} onDraftChange={setDraftHook} selected={candidate.id === selectedId} onDiscard={() => toggleDiscard(candidate.id)} onEdit={() => editCandidate(candidate)} onMerge={() => mergeIntoSelected(candidate)} onSelect={() => { setSelectedId(candidate.id); setMergedIds((items) => items.filter((item) => item !== candidate.id)); }} />
+            <CandidateLane candidate={candidate} draftHook={draftHook} editing={editingId === candidate.id} key={candidate.id} onDraftChange={(value) => patchState({ draftHook: value })} selected={candidate.id === selectedId} onDiscard={() => toggleDiscard(candidate.id)} onEdit={() => editCandidate(candidate)} onMerge={() => mergeIntoSelected(candidate)} onSelect={() => { patchState({ selectedId: candidate.id }); mergedIdsRef.current = mergedIdsRef.current.filter((item) => item !== candidate.id); }} />
           ))}
         </div>
       </section>
