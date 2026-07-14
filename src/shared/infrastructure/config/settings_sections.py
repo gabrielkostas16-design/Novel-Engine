@@ -153,6 +153,7 @@ class SecuritySettings(BaseSettings):
             "Origin",
             "X-Requested-With",
             "X-CSRF-Token",
+            "Idempotency-Key",
         ],
         description="Allowed CORS headers",
     )

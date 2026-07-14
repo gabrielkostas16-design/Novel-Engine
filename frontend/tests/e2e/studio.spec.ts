@@ -4,7 +4,7 @@ test('owner writes, accepts an AI proposal, reviews history, and exports', async
   await page.goto('/');
   await page.getByLabel('账号').fill('kunlei-test-owner');
   await page.getByLabel('密码').fill('Kunlei-Test-Owner-2026!');
-  await page.getByRole('button', { name: '创建并登录' }).click();
+  await page.getByRole('button', { name: /创建并登录|登录工作台/ }).click();
   await expect(page).toHaveURL(/\/projects$/);
 
   await page.getByLabel('Title').fill('The Glass Harbor');

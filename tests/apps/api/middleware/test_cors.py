@@ -24,6 +24,7 @@ def test_default_cors_config_includes_local_development_origins(
     assert config["allow_credentials"] is True
     assert "Authorization" in config["allow_headers"]
     assert "X-CSRF-Token" in config["allow_headers"]
+    assert "Idempotency-Key" in config["allow_headers"]
     assert "X-Request-ID" in config["expose_headers"]
 
 
